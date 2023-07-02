@@ -1,2 +1,2 @@
 # fooCV
-very basic
+just foo
