@@ -3,9 +3,10 @@
  *
  *  Created on: 2023年4月29日
  *      Author: Kuang
+ *      七月五日更新： 修复了无法正常读取奇数宽度的图片问题
  */
 
-#include "imgconf.h"
+#include "../inc/imgconf.h"
 
 
 
@@ -80,12 +81,25 @@ BMPIMG* getBMPIMG(char *name, int palette_size) {
 	return img;
 }
 IMG* getIMG( BMPIMG *bmpimg){
+	int realRowSize =(bmpimg->info->bit_count*bmpimg->w+31)/32*4;
+	int chl=bmpimg->info->bit_count/8;
+	unsigned char* data = (unsigned char*) malloc(
+				sizeof(unsigned char) * bmpimg->h *bmpimg->w*chl);
+
+	int index=0;
+		for(int h=0;h<bmpimg->h;h++){
+			for(int w=0;w<bmpimg->w*chl;w++){
+			data[index]=bmpimg->data[h*realRowSize+w];
+				index++;
+			}
+		}
 	IMG* img=(IMG*)malloc(sizeof(IMG));
-	img->data=bmpimg->data;
+	img->data=data;
 	img->w=bmpimg->w;
 	img->h=bmpimg->h;
-	img->chl=bmpimg->info->bit_count/8;
+	img->chl=chl;
 	return img;
+
 }
 BMPIMG* IMG2BMP(IMG* img){
 	int nofQUAD;
@@ -103,10 +117,12 @@ BMPIMG* IMG2BMP(IMG* img){
 			_img[index]=img->data[h*img->w*img->chl+w];
 			index++;
 		}
+
 		for(int w=img->w*img->chl;w<realRowSize;w++){
 			_img[index]=0;
 			index++;
 		}
+
 	}
 
 	BMPIMG *bmp = (BMPIMG*) malloc(sizeof(BMPIMG));
@@ -124,7 +140,7 @@ BMPIMG* IMG2BMP(IMG* img){
     bmp->info->height=img->h;
     bmp->info->planes=1;
     bmp->info->bit_count=8*img->chl;
-    bmp->info->size_image=sizeof(unsigned char)*img->w*img->h*img->chl;
+    bmp->info->size_image=sizeof(unsigned char)*realRowSize*img->h;
     bmp->info->x_pels_permeter=0;
     bmp->info->y_pels_permeter=0;
     bmp->info->clr_important=0;
