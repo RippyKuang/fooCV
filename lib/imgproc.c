@@ -326,4 +326,58 @@ F32_IMG** DoG(F32_IMG** img,float sigma,int n){
 
 }
 
+void find_extremum(int oct, int inter,IMG* img){
+		IMG* grayimg=imgcpy(img, U8);
+		BGR2GRAY(grayimg);
+		COLOR red;
+	        unsigned char c[3];
+			c[0]=0;
+			c[1]=0;
+			c[2]=255;
+			red.c=c;
+		F32_IMG* f32_grayimg=U8toF32(grayimg);
+		for(int i=0;i<oct;i++){
+		F32_IMG** oct1 =DoG(&f32_grayimg, 1.6, inter);
+		for (int x=0;x<inter;x++) norm(oct1[x]);
+		for(int z=1;z<inter-1;z++){
+			for(int x=inter; x<oct1[z]->w-inter;x++){
+				for(int y=inter; y<oct1[z]->h-inter;y++){
+					for(int a=-1;a<2;a++)
+						for( int b=-1;b<2;b++)
+						if((oct1[z]->data[oct1[z]->w*y+x]<=oct1[z-1]->data[oct1[z-1]->w*(y+a)+x+b]))
+							goto min;
 
+					for(int a=-1;a<2;a++)
+						for( int b=-1;b<2;b++)
+						if((oct1[z]->data[oct1[z]->w*y+x]<=oct1[z+1]->data[oct1[z+1]->w*(y+a)+x+b]))
+							goto min;
+					for(int a=-1;a<=1;a+=2)
+						for( int b=-1;b<=1;b+=2)
+						if((oct1[z]->data[oct1[z]->w*y+x]<=oct1[z]->data[oct1[z]->w*(y+a)+x+b]))
+							goto min;
+					draw_circle(img, x*(i+1), y*(i+1), 5, &red);
+
+					goto end;
+					min:;
+					for(int a=-1;a<2;a++)
+						for( int b=-1;b<2;b++)
+						if((oct1[z]->data[oct1[z]->w*y+x]>=oct1[z-1]->data[oct1[z-1]->w*(y+a)+x+b]))
+							goto end;
+
+				   for(int a=-1;a<2;a++)
+						for( int b=-1;b<2;b++)
+						if((oct1[z]->data[oct1[z]->w*y+x]>=oct1[z+1]->data[oct1[z+1]->w*(y+a)+x+b]))
+							goto end;
+				  for(int a=-1;a<=1;a+=2)
+						for( int b=-1;b<=1;b+=2)
+						if((oct1[z]->data[oct1[z]->w*y+x]>=oct1[z]->data[oct1[z]->w*(y+a)+x+b]))
+							goto end;
+					draw_circle(img, x*(i+1), y*(i+1), 5, &red);
+
+				    end:;
+				}
+			}
+		}
+		}
+		saveBMPIMG("/home/rippy/workspace/LiteCV/src/extremum.bmp", img, 0);
+}
