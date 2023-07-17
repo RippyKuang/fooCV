@@ -6,7 +6,7 @@
  *      七月五日更新： 修复了无法正常读取奇数宽度的图片问题
  */
 
-#include "../inc/imgconf.h"
+#include "imgconf.h"
 
 
 
