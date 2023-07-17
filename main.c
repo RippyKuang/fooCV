@@ -12,8 +12,8 @@ int main(){
 	Vec* B=newMat(3,1);
 	float dtb[]={12,9,5};
 	B->data=dtb;
-	Vec* lu=LUP_solve(A,B);
-	 printMat(lu);
+	Vec* res=LUP_solve(A,B);
+	printMat(res);
 
 	return 0;
 }
